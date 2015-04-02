@@ -13,10 +13,9 @@ You need to set config:
         index_type: ~
         color_tag_open: <b class="yellow">
         color_tag_close: </b>
-        index: [fields]
+        index: []
         search: 
-            fields: [fields]
-            analyze: true
+            fields: []
             parameters: 
                 fuzziness: 0.6
                 operator: or
@@ -24,8 +23,9 @@ You need to set config:
                 tie_breaker: 0.3
                 minimum_should_match: 30%
             filter:
-                fields: [fields]
+                fields: []
                 count: 10
+                analyze: true
                 
             
 
