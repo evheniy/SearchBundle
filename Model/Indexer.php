@@ -8,4 +8,9 @@ class Indexer
     {
 
     }
+
+    protected function getIndexName()
+    {
+
+    }
 }

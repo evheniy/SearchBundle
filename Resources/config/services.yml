@@ -1,6 +1,14 @@
 services:
     evheniy.twig.search_extension:
-        class: Evheniy\GtmBundle\Twig\SearchExtension
+        class: Evheniy\SearchBundle\Twig\SearchExtension
         arguments: [@service_container]
         tags:
             - { name: twig.extension }
+
+    search:
+        class: Evheniy\SearchBundle\Model\Searcher
+        arguments: [@service_container]
+
+    search_index:
+        class: Evheniy\SearchBundle\Model\Indexer
+        arguments: [@service_container]
