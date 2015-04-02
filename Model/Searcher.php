@@ -10,7 +10,7 @@ class Searcher
     }
     public function search()
     {
-
+echo 1;
     }
 
     public function getFilters()
