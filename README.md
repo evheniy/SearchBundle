@@ -9,10 +9,20 @@ Documentation
 You need to set config:
 
     search:
+        index_name: ~
+        index_type: ~
+        color_tag_open: <b class="yellow">
+        color_tag_close: </b>
         index: [fields]
         search: 
             fields: [fields]
             analyze: true
+            parameters: 
+                fuzziness: 0.6
+                operator: or
+                type: best_fields
+                tie_breaker: 0.3
+                minimum_should_match: 30%
                 
             
 
@@ -42,7 +52,6 @@ Installation
             index: [fields]
             search: 
                 fields: [fields]
-                analyze: true
 
 License
 -------

@@ -1,0 +1,6 @@
+services:
+    evheniy.twig.search_extension:
+        class: Evheniy\GtmBundle\Twig\SearchExtension
+        arguments: [@service_container]
+        tags:
+            - { name: twig.extension }
