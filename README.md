@@ -23,6 +23,9 @@ You need to set config:
                 type: best_fields
                 tie_breaker: 0.3
                 minimum_should_match: 30%
+            filter:
+                fields: [fields]
+                count: 10
                 
             
 
