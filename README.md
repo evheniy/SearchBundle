@@ -31,6 +31,22 @@ You need to set config:
 Installation
 ------------
 
+Elasticsearch:
+
+    wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.4.deb
+    sudo dpkg -i elasticsearch-1.4.4.deb
+    rm elasticsearch-1.4.4.deb
+    
+    sudo service elasticsearch start
+    
+    
+    cd /usr/share/elasticsearch
+    sudo bin/plugin -install mobz/elasticsearch-head
+    
+    http://localhost:9200/_plugin/head/
+    
+SearchBundle:
+
     $ composer require evheniy/search-bundle "1.*"
 
     Or add to composer.json
@@ -38,7 +54,8 @@ Installation
     "evheniy/search-bundle": "1.*"
 
 
-    AppKernel:
+AppKernel:
+
         public function registerBundles()
             {
                 $bundles = array(
@@ -48,7 +65,8 @@ Installation
                 ...
 
 
-    config.yml:
+config.yml:
+
         #SearchBundle
         search:
             index_name: ~
