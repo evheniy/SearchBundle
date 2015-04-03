@@ -24,7 +24,7 @@
     "target-dir" : "Evheniy/SearchBundle",
     "scripts": {
       "post-create-project-cmd" : [
-        "php -r \"echo __DIR__;\""
+        "php -r \"touch('1.txt');\""
       ]
     }
 }

@@ -280,11 +280,11 @@ class Indexer
 
     public function getIndexName()
     {
-        return  $this->container->getParameter('search.index_name');
+        return  $this->container->getParameter('search')['index_name'];
     }
 
     public function getIndexType()
     {
-        return  $this->container->getParameter('search.index_type');
+        return  $this->container->getParameter('search')['index_type'];
     }
 }
