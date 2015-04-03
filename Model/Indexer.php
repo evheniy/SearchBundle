@@ -2,60 +2,12 @@
 
 namespace Evheniy\SearchBundle\Model;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Elasticsearch\Client;
-
 /**
  * Class Indexer
  * @package Evheniy\SearchBundle\Model
  */
-class Indexer
+class Indexer extends IndexAbstract
 {
-    /**
-     * @var \Symfony\Component\DependencyInjection\ContainerInterface
-     */
-    protected $container;
-    /**
-     * @var Client
-     */
-    protected $client;
-
-    /**
-     * @param ContainerInterface $container
-     */
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-        $this->client    = new Client();
-        if (!$this->isSynonymsExists()) {
-            $this->createSynonyms();
-        }
-    }
-
-    /**
-     * @return bool
-     */
-    protected function isSynonymsExists()
-    {
-        return file_exists($this->getSynonyms());
-    }
-
-    /**
-     * Create synonyms file
-     */
-    protected function createSynonyms()
-    {
-        copy(__DIR__ . '/../Resources/config/synonyms.txt.dist', $this->getSynonyms());
-    }
-
-    /**
-     * @return string
-     */
-    protected function getSynonyms()
-    {
-        return $this->container->get('kernel')->getRootDir() . '/config/synonyms.txt';
-    }
-
     /**
      * Delete index
      */
@@ -68,6 +20,9 @@ class Indexer
 
     public function createIndex()
     {
+        if (!$this->isSynonymsExists()) {
+            $this->createSynonyms();
+        }
         $this->client->indices()->create(
             array(
                 'index' => $this->getIndexName(),
@@ -279,42 +234,40 @@ class Indexer
         $params = array(
             'index' => $this->getIndexName(),
             'type'  => $this->getIndexType(),
-            'body'  => array(
-                'restaurantId'         => (int)$data['restaurantId'],
-                'restaurantName'       => !empty($data['restaurantName']) ? $data['restaurantName'] : '',
-                'address'              => !empty($data['address']) ? $data['address'] : '',
-                'addressCity'          => !empty($data['addressCity']) ? $data['addressCity'] : '',
-                'addressPostcode'      => !empty($data['addressPostcode']) ? $data['addressPostcode'] : '',
-                'menuUrl'              => !empty($data['menuUrl']) ? $data['menuUrl'] : '',
-                'deliveryDistrict'     => !empty($data['deliveryDistrict']) ? $data['deliveryDistrict'] : '',
-                'deliveryTown'         => !empty($data['deliveryTown']) ? $data['deliveryTown'] : '',
-                'primaryCuisine'       => !empty($data['primaryCuisine']) ? $data['primaryCuisine'] : '',
-                'secondaryCuisine'     => !empty($data['secondaryCuisine']) ? $data['secondaryCuisine'] : '',
-                'uniqueName'           => !empty($data['uniqueName']) ? $data['uniqueName'] : '',
-                'ratingStars'          => !empty($data['ratingStars']) ? $data['ratingStars'] : '',
-                'numberOfRatings'      => !empty($data['numberOfRatings']) ? $data['numberOfRatings'] : '',
-                'logo'                 => !empty($data['logo']) ? $data['logo'] : '',
-                'dealsDescription'     => !empty($data['dealsDescription']) ? $data['dealsDescription'] : '',
-                'dealsDiscountPercent' => !empty($data['dealsDiscountPercent']) ? $data['dealsDiscountPercent'] : '',
-                'dealsQualifyingPrice' => !empty($data['dealsQualifyingPrice']) ? $data['dealsQualifyingPrice'] : ''
-            )
+            'body'  => array()
         );
+        $fields = array_merge(
+            $this->container->getParameter('search')['search']['fields'],
+            $this->container->getParameter('search')['search']['filter']['fields']
+        );
+        foreach ($fields as $field) {
+            $params['body'][$field] = !empty($data[$field]) ? $data[$field] : '';
+        }
         $this->client->index($params);
     }
 
     /**
-     * @return string
+     * @return bool
      */
-    public function getIndexName()
+    protected function isSynonymsExists()
     {
-        return  $this->container->getParameter('search')['index_name'];
+        return file_exists($this->getSynonyms());
+    }
+
+    /**
+     * Create synonyms file
+     */
+    protected function createSynonyms()
+    {
+        copy(__DIR__ . '/../Resources/config/synonyms.txt.dist', $this->getSynonyms());
     }
 
     /**
      * @return string
      */
-    public function getIndexType()
+    protected function getSynonyms()
     {
-        return  $this->container->getParameter('search')['index_type'];
+        return $this->container->get('kernel')->getRootDir() . '/config/synonyms.txt';
     }
+
 }

@@ -13,7 +13,6 @@ You need to set config:
         index_type: ~
         color_tag_open: <b class="yellow">
         color_tag_close: </b>
-        index: [fields]
         search: 
             fields: [fields]
             parameters: 
@@ -56,7 +55,6 @@ Installation
             index_type: ~
             color_tag_open: <b class="yellow">
             color_tag_close: </b>
-            index: [fields]
             search: 
                 fields: [fields]
                 parameters: 
