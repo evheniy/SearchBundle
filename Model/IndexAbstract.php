@@ -43,4 +43,68 @@ abstract class IndexAbstract
     {
         return  $this->container->getParameter('search')['index_type'];
     }
+
+    /**
+     * @return array
+     */
+    protected function getStopWordsArray()
+    {
+        if (!$this->isStopWordsExists()) {
+            $this->createStopWords();
+        }
+        return array_map(
+            function ($string) {
+                return trim(preg_replace('/\s\s+/', '', $string));
+            },
+            file($this->container->get('kernel')->getRootDir().'/config/stopwords.txt')
+        );
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isSynonymsExists()
+    {
+        return file_exists($this->getSynonyms());
+    }
+
+    /**
+     * Create synonyms file
+     */
+    protected function createSynonyms()
+    {
+        copy(__DIR__.'/../Resources/config/synonyms.txt.dist', $this->getSynonyms());
+    }
+
+    /**
+     * @return string
+     */
+    protected function getSynonyms()
+    {
+        return $this->container->get('kernel')->getRootDir().'/config/synonyms.txt';
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isStopWordsExists()
+    {
+        return file_exists($this->getStopWords());
+    }
+
+    /**
+     * Create stopwords file
+     */
+    protected function createStopWords()
+    {
+        copy(__DIR__.'/../Resources/config/stopwords.txt.dist', $this->getStopWords());
+    }
+
+    /**
+     * @return string
+     */
+    protected function getStopWords()
+    {
+        return $this->container->get('kernel')->getRootDir().'/config/stopwords.txt';
+    }
 }

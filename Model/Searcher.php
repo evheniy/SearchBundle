@@ -13,4 +13,13 @@ class Searcher extends IndexAbstract
     {
 
     }
+
+    /**
+     * @param string $query
+     * @return string
+     */
+    public function getFilteredQuery($query)
+    {
+        return preg_replace('/\b(' . implode('|', $this->getStopWordsArray()) . ')\b/', '', $query);
+    }
 }

@@ -26,6 +26,11 @@ class Indexer extends IndexAbstract
         if (!$this->isSynonymsExists()) {
             $this->createSynonyms();
         }
+
+        if (!$this->isStopWordsExists()) {
+            $this->createStopWords();
+        }
+
         $this->client->indices()->create(
             $this->getIndexStructure()
         );
@@ -52,30 +57,6 @@ class Indexer extends IndexAbstract
     }
 
     /**
-     * @return bool
-     */
-    protected function isSynonymsExists()
-    {
-        return file_exists($this->getSynonyms());
-    }
-
-    /**
-     * Create synonyms file
-     */
-    protected function createSynonyms()
-    {
-        copy(__DIR__.'/../Resources/config/synonyms.txt.dist', $this->getSynonyms());
-    }
-
-    /**
-     * @return string
-     */
-    protected function getSynonyms()
-    {
-        return $this->container->get('kernel')->getRootDir().'/config/synonyms.txt';
-    }
-
-    /**
      * @return array
      */
     protected function getIndexStructure()
@@ -88,13 +69,17 @@ class Indexer extends IndexAbstract
                         'analyzer' => array(
                             'synonym' => array(
                                 'tokenizer' => 'whitespace',
-                                'filter'    => array('synonym')
+                                'filter'    => array('synonym', 'stopwords')
                             )
                         ),
                         'filter'   => array(
                             'synonym' => array(
                                 'type'          => 'synonym',
                                 'synonyms_path' => $this->getSynonyms()
+                            ),
+                            'stopwords' => array(
+                                'type'          => 'standard',
+                                'stopwords_path' => $this->getStopWords()
                             )
                         )
                     ),
