@@ -23,8 +23,11 @@
     },
     "target-dir" : "Evheniy/SearchBundle",
     "scripts": {
-      "post-create-project-cmd" : [
+      "post-install-cmd" : [
         "php -r \"touch('1.txt');\""
+      ],
+      "post-update-cmd" : [
+        "php -r \"touch('2.txt');\""
       ]
     }
 }
