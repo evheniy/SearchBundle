@@ -18,217 +18,22 @@ class Indexer extends IndexAbstract
         }
     }
 
+    /**
+     * Create index
+     */
     public function createIndex()
     {
         if (!$this->isSynonymsExists()) {
             $this->createSynonyms();
         }
         $this->client->indices()->create(
-            array(
-                'index' => $this->getIndexName(),
-                'body'  => array(
-                    'settings' => array(
-                        'analysis'   => array(
-                            'analyzer' => array(
-                                'synonym' => array(
-                                    'tokenizer' => 'whitespace',
-                                    'filter'    => array('synonym')
-                                )
-                            ),
-                            'filter'   => array(
-                                'synonym' => array(
-                                    'type'          => 'synonym',
-                                    'synonyms_path' => $this->getSynonyms()
-                                )
-                            )
-                        ),
-                        'properties' => array(
-                            'restaurantId'         => array(
-                                'type' => 'long'
-                            ),
-                            'restaurantName'       => array(
-                                'type'        => 'string',
-                                'analyzer'    => 'synonym',
-                                'term_vector' => 'with_positions_offsets'
-                            ),
-                            'address'              => array(
-                                'type'        => 'string',
-                                'analyzer'    => 'stem',
-                                'term_vector' => 'with_positions_offsets'
-                            ),
-                            'addressPostcode'      => array(
-                                'type'        => 'string',
-                                'analyzer'    => 'stem',
-                                'term_vector' => 'with_positions_offsets'
-                            ),
-                            'menuUrl'              => array(
-                                'type'        => 'string',
-                                'analyzer'    => 'stem',
-                                'term_vector' => 'with_positions_offsets'
-                            ),
-                            'deliveryArea'         => array(
-                                'type'        => 'string',
-                                'analyzer'    => 'stem',
-                                'term_vector' => 'with_positions_offsets'
-                            ),
-                            'primaryCuisine'       => array(
-                                'type'        => 'string',
-                                'analyzer'    => 'stem',
-                                'term_vector' => 'with_positions_offsets'
-                            ),
-                            'secondaryCuisine'     => array(
-                                'type'        => 'string',
-                                'analyzer'    => 'stem',
-                                'term_vector' => 'with_positions_offsets'
-                            ),
-                            'uniqueName'           => array(
-                                'type'        => 'string',
-                                'analyzer'    => 'stem',
-                                'term_vector' => 'with_positions_offsets'
-                            ),
-                            'ratingStars'          => array(
-                                'type'        => 'string',
-                                'analyzer'    => 'stem',
-                                'term_vector' => 'with_positions_offsets'
-                            ),
-                            'numberOfRatings'      => array(
-                                'type'        => 'string',
-                                'analyzer'    => 'stem',
-                                'term_vector' => 'with_positions_offsets'
-                            ),
-                            'logo'                 => array(
-                                'type'        => 'string',
-                                'analyzer'    => 'stem',
-                                'term_vector' => 'with_positions_offsets'
-                            ),
-                            'dealsDescription'     => array(
-                                'type'        => 'string',
-                                'analyzer'    => 'stem',
-                                'term_vector' => 'with_positions_offsets'
-                            ),
-                            'dealsDiscountPercent' => array(
-                                'type'        => 'string',
-                                'analyzer'    => 'stem',
-                                'term_vector' => 'with_positions_offsets'
-                            ),
-                            'dealsQualifyingPrice' => array(
-                                'type'        => 'string',
-                                'analyzer'    => 'stem',
-                                'term_vector' => 'with_positions_offsets'
-                            ),
-                            'addressCity'          => array(
-                                'type'  => 'string',
-                                'index' => 'not_analyzed'
-                            ),
-                            'deliveryDistrict'     => array(
-                                'type'  => 'string',
-                                'index' => 'not_analyzed'
-                            ),
-                            'deliveryTown'         => array(
-                                'type'  => 'string',
-                                'index' => 'not_analyzed'
-                            )
-                        )
-                    ),
-                    'mappings' => array(
-                        'restaurants' => array(
-                            'properties' => array(
-                                'restaurantId'         => array(
-                                    'type' => 'long'
-                                ),
-                                'restaurantName'       => array(
-                                    'type'            => 'string',
-                                    'search_analyzer' => 'synonym',
-                                    'index_analyzer'  => 'synonym'
-                                ),
-                                'address'              => array(
-                                    'type'            => 'string',
-                                    'search_analyzer' => 'synonym',
-                                    'index_analyzer'  => 'synonym'
-                                ),
-                                'addressPostcode'      => array(
-                                    'type'            => 'string',
-                                    'search_analyzer' => 'synonym',
-                                    'index_analyzer'  => 'synonym'
-                                ),
-                                'menuUrl'              => array(
-                                    'type'            => 'string',
-                                    'search_analyzer' => 'synonym',
-                                    'index_analyzer'  => 'synonym'
-                                ),
-                                'deliveryArea'         => array(
-                                    'type'            => 'string',
-                                    'search_analyzer' => 'synonym',
-                                    'index_analyzer'  => 'synonym'
-                                ),
-                                'primaryCuisine'       => array(
-                                    'type'            => 'string',
-                                    'search_analyzer' => 'synonym',
-                                    'index_analyzer'  => 'synonym'
-                                ),
-                                'secondaryCuisine'     => array(
-                                    'type'            => 'string',
-                                    'search_analyzer' => 'synonym',
-                                    'index_analyzer'  => 'synonym'
-                                ),
-                                'uniqueName'           => array(
-                                    'type'            => 'string',
-                                    'search_analyzer' => 'synonym',
-                                    'index_analyzer'  => 'synonym'
-                                ),
-                                'ratingStars'          => array(
-                                    'type'            => 'string',
-                                    'search_analyzer' => 'synonym',
-                                    'index_analyzer'  => 'synonym'
-                                ),
-                                'numberOfRatings'      => array(
-                                    'type'            => 'string',
-                                    'search_analyzer' => 'synonym',
-                                    'index_analyzer'  => 'synonym'
-                                ),
-                                'logo'                 => array(
-                                    'type'            => 'string',
-                                    'search_analyzer' => 'synonym',
-                                    'index_analyzer'  => 'synonym'
-                                ),
-                                'dealsDescription'     => array(
-                                    'type'            => 'string',
-                                    'search_analyzer' => 'synonym',
-                                    'index_analyzer'  => 'synonym'
-                                ),
-                                'dealsDiscountPercent' => array(
-                                    'type'            => 'string',
-                                    'search_analyzer' => 'synonym',
-                                    'index_analyzer'  => 'synonym'
-                                ),
-                                'dealsQualifyingPrice' => array(
-                                    'type'            => 'string',
-                                    'search_analyzer' => 'synonym',
-                                    'index_analyzer'  => 'synonym'
-                                ),
-                                'addressCity'          => array(
-                                    'type'  => 'string',
-                                    'index' => 'not_analyzed'
-                                ),
-                                'deliveryTown'         => array(
-                                    'type'            => 'string',
-                                    'search_analyzer' => 'synonym',
-                                    'index'           => 'not_analyzed'
-                                ),
-                                'deliveryDistrict'     => array(
-                                    'type'            => 'string',
-                                    'search_analyzer' => 'synonym',
-                                    'index'           => 'not_analyzed'
-                                )
-                            )
-
-                        )
-                    )
-                )
-            )
+            $this->getIndexStructure()
         );
     }
 
+    /**
+     * @param array $data
+     */
     public function indexDocument(array $data)
     {
         $params = array(
@@ -259,7 +64,7 @@ class Indexer extends IndexAbstract
      */
     protected function createSynonyms()
     {
-        copy(__DIR__ . '/../Resources/config/synonyms.txt.dist', $this->getSynonyms());
+        copy(__DIR__.'/../Resources/config/synonyms.txt.dist', $this->getSynonyms());
     }
 
     /**
@@ -267,7 +72,91 @@ class Indexer extends IndexAbstract
      */
     protected function getSynonyms()
     {
-        return $this->container->get('kernel')->getRootDir() . '/config/synonyms.txt';
+        return $this->container->get('kernel')->getRootDir().'/config/synonyms.txt';
     }
 
+    /**
+     * @return array
+     */
+    protected function getIndexStructure()
+    {
+        $structure = array(
+            'index' => $this->getIndexName(),
+            'body'  => array(
+                'settings' => array(
+                    'analysis'   => array(
+                        'analyzer' => array(
+                            'synonym' => array(
+                                'tokenizer' => 'whitespace',
+                                'filter'    => array('synonym')
+                            )
+                        ),
+                        'filter'   => array(
+                            'synonym' => array(
+                                'type'          => 'synonym',
+                                'synonyms_path' => $this->getSynonyms()
+                            )
+                        )
+                    ),
+                    'properties' => array()
+                ),
+                'mappings' => array(
+                    $this->getIndexType() => array(
+                        'properties' => array()
+                    )
+                )
+            )
+        );
+
+        //properties
+        foreach ($this->container->getParameter('search')['search']['fields'] as $field) {
+            $structure['body']['settings']['properties'][$field] = array(
+                'type'        => 'string',
+                'analyzer'    => 'synonym',
+                'term_vector' => 'with_positions_offsets'
+            );
+        }
+        foreach ($this->container->getParameter('search')['search']['filter']['fields'] as $field) {
+            if ($this->container->getParameter('search')['search']['filter']['analyze']) {
+                $structure['body']['settings']['properties'][$field] = array(
+                    'type'        => 'string',
+                    'analyzer'    => 'synonym',
+                    'term_vector' => 'with_positions_offsets'
+                );
+            } else {
+                $structure['body']['settings']['properties'][$field] = array(
+                    'type'  => 'string',
+                    'index' => 'not_analyzed'
+                );
+            }
+
+        }
+
+        //mappings
+        foreach ($this->container->getParameter('search')['search']['fields'] as $field) {
+            $structure['body']['mappings'][$this->getIndexType()]['properties'][$field] = array(
+                'type'        => 'string',
+                'analyzer'    => 'synonym',
+                'term_vector' => 'with_positions_offsets'
+            );
+        }
+        foreach ($this->container->getParameter('search')['search']['filter']['fields'] as $field) {
+            if ($this->container->getParameter('search')['search']['filter']['analyze']) {
+                $structure['body']['mappings'][$this->getIndexType()]['properties'][$field] = array(
+                    'type'            => 'string',
+                    'search_analyzer' => 'synonym',
+                    'index_analyzer'  => 'synonym'
+                );
+            } else {
+                $structure['body']['mappings'][$this->getIndexType()]['properties'][$field] = array(
+                    'type'            => 'string',
+                    'search_analyzer' => 'synonym',
+                    'index'           => 'not_analyzed'
+                );
+            }
+
+        }
+
+        return $structure;
+    }
 }
