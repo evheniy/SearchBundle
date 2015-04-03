@@ -19,11 +19,6 @@ class Indexer
      * @var Client
      */
     protected $client;
-    /**
-     * @var string
-     */
-    protected $synonymsPath;
-
 
     /**
      * @param ContainerInterface $container
@@ -32,9 +27,38 @@ class Indexer
     {
         $this->container = $container;
         $this->client    = new Client();
-        $this->synonymsPath = $this->container->get('kernel')->getRootDir() . '/config/synonyms.txt';
+        if (!$this->isSynonymsExists()) {
+            $this->createSynonyms();
+        }
     }
 
+    /**
+     * @return bool
+     */
+    protected function isSynonymsExists()
+    {
+        return file_exists($this->getSynonyms());
+    }
+
+    /**
+     * Create synonyms file
+     */
+    protected function createSynonyms()
+    {
+        copy(__DIR__ . '/../Resources/config/synonyms.txt.dist', $this->getSynonyms());
+    }
+
+    /**
+     * @return string
+     */
+    protected function getSynonyms()
+    {
+        return $this->container->get('kernel')->getRootDir() . '/config/synonyms.txt';
+    }
+
+    /**
+     * Delete index
+     */
     public function deleteIndex()
     {
         if ($this->client->indices()->exists(array('index' => $this->getIndexName()))) {
@@ -59,7 +83,7 @@ class Indexer
                             'filter'   => array(
                                 'synonym' => array(
                                     'type'          => 'synonym',
-                                    'synonyms_path' => $this->synonymsPath
+                                    'synonyms_path' => $this->getSynonyms()
                                 )
                             )
                         ),
@@ -278,11 +302,17 @@ class Indexer
         $this->client->index($params);
     }
 
+    /**
+     * @return string
+     */
     public function getIndexName()
     {
         return  $this->container->getParameter('search')['index_name'];
     }
 
+    /**
+     * @return string
+     */
     public function getIndexType()
     {
         return  $this->container->getParameter('search')['index_type'];

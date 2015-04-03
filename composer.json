@@ -21,13 +21,5 @@
             "Evheniy\\SearchBundle": ""
         }
     },
-    "target-dir" : "Evheniy/SearchBundle",
-    "scripts": {
-      "post-install-cmd" : [
-        "php -r \"touch('1.txt');\""
-      ],
-      "post-update-cmd" : [
-        "php -r \"touch('2.txt');\""
-      ]
-    }
+    "target-dir" : "Evheniy/SearchBundle"
 }
