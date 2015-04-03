@@ -2,15 +2,11 @@
 
 namespace Evheniy\SearchBundle\Model;
 
-class Searcher
+class Searcher extends IndexAbstract
 {
-    public function __construct($searchQuery = '')
-    {
-
-    }
     public function search()
     {
-echo 1;
+
     }
 
     public function getFilters()
