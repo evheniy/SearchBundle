@@ -78,11 +78,14 @@ class SearchExtension extends \Twig_Extension
 
         $searcher = $this->container->get('search');
 
-        $url = $searcher->hierarchyLogic(
-            array(
-                'cities'    => $url['cities'],
-                'towns'     => $url['towns'],
-                'districts' => $url['districts']
+        array_merge(
+            $url,
+            $searcher->hierarchyLogic(
+                array(
+                    'cities'    => $url['cities'],
+                    'towns'     => $url['towns'],
+                    'districts' => $url['districts']
+                )
             )
         );
 
