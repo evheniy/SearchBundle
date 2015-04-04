@@ -26,7 +26,7 @@ abstract class IndexAbstract
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        $this->client    = new Client(array('hosts' => '127.0.0.1'));
+        $this->client    = new Client(array('hosts' => array('127.0.0.1')));
     }
     /**
      * @return string
