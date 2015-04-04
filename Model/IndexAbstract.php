@@ -56,7 +56,7 @@ abstract class IndexAbstract
             function ($string) {
                 return trim(preg_replace('/\s\s+/', '', $string));
             },
-            file($this->container->get('kernel')->getRootDir().'/config/stopwords.txt')
+            file($this->getStopWords())
         );
     }
 
@@ -81,7 +81,7 @@ abstract class IndexAbstract
      */
     protected function getSynonyms()
     {
-        return $this->container->get('kernel')->getRootDir().'/config/synonyms.txt';
+        return __DIR__ . '/../../../../../app/config/synonyms.txt';
     }
 
     /**
@@ -105,6 +105,6 @@ abstract class IndexAbstract
      */
     protected function getStopWords()
     {
-        return $this->container->get('kernel')->getRootDir().'/config/stopwords.txt';
+        return __DIR__ . '/../../../../../app/config/stopwords.txt';
     }
 }
