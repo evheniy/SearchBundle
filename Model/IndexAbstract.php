@@ -26,7 +26,7 @@ abstract class IndexAbstract
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        $this->client    = new Client();
+        $this->client    = new Client(array('hosts' => '127.0.0.1'));
     }
     /**
      * @return string
@@ -81,7 +81,7 @@ abstract class IndexAbstract
      */
     protected function getSynonyms()
     {
-        return __DIR__ . '/../../../../../app/config/synonyms.txt';
+        return $this->container->get('kernel')->getRootDir().'/config/synonyms.txt';
     }
 
     /**
@@ -105,6 +105,6 @@ abstract class IndexAbstract
      */
     protected function getStopWords()
     {
-        return __DIR__ . '/../../../../../app/config/stopwords.txt';
+        return $this->container->get('kernel')->getRootDir().'/config/stopwords.txt';
     }
 }
