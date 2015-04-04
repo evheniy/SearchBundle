@@ -106,7 +106,7 @@ class Searcher extends IndexAbstract
         foreach ($this->container->getParameter('search')['search']['fields'] as $field) {
             $searchParams['body']['query']['multi_match']['fields'][] = $field;
             $searchParams['body']['highlight']['fields'][$field] = array(
-                'fragment_size'       => 150,
+                'fragment_size'       => 1500,
                 'number_of_fragments' => 3
             );
         }
