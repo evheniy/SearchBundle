@@ -86,6 +86,26 @@ config.yml:
                     count: 10
                     analyze: true
 
+Indexing
+
+        $indexer = $this->getContainer()->get('search_index');
+        $indexer->deleteIndex();
+        $indexer->createIndex();
+        foreach ($pages as $page) {
+            $indexer->indexDocument(
+                DocumentEntity::createFromArray(
+                    $indexer->getIndexFieldNames(),
+                    array(
+                        'url'     => $page->getUrl(),
+                        'title'   => $page->getPageTitle(),
+                        'article' => $page->getPageArticle()
+                    )
+                )
+            );
+        }
+
+
+
 License
 -------
 
