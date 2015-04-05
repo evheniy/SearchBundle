@@ -54,7 +54,7 @@ abstract class IndexAbstract
         }
         return array_map(
             function ($string) {
-                return trim(preg_replace('/\s\s+/', '', $string));
+                return $this->trimFilter($string);
             },
             file($this->getStopWords())
         );
@@ -70,10 +70,20 @@ abstract class IndexAbstract
         }
         return array_map(
             function ($string) {
-                return trim(preg_replace('/\s\s+/', ' ', $string));
+                return $this->trimFilter($string);
             },
             file($this->getSynonyms())
         );
+    }
+
+    /**
+     * @param string $string
+     *
+     * @return string
+     */
+    protected function trimFilter($string)
+    {
+        return trim(preg_replace('/\s\s+/', ' ', $string));
     }
 
     /**
