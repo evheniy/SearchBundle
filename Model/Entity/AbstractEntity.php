@@ -2,7 +2,6 @@
 
 namespace Evheniy\SearchBundle\Model\Entity;
 
-
 use Evheniy\SearchBundle\Model\Exception\FieldNotFoundException;
 use Evheniy\SearchBundle\Model\Exception\MethodNotFoundException;
 

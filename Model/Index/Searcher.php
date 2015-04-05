@@ -2,6 +2,13 @@
 
 namespace Evheniy\SearchBundle\Model\Index;
 
+use Evheniy\SearchBundle\Model\Collection\DocumentCollection;
+
+/**
+ * Class Searcher
+ *
+ * @package Evheniy\SearchBundle\Model\Index
+ */
 class Searcher extends IndexAbstract
 {
     /**
@@ -35,9 +42,13 @@ class Searcher extends IndexAbstract
         $this->countResults = $queryResponse['hits']['total'];
         $this->facets = $queryResponse['facets'];
         $this->paginator = $this->container->get('knp_paginator')->paginate(array_pad(array(), $this->getCountResults(), 0), $page, $size);
-        return $this->transformData(
-            $queryResponse['hits']['hits'],
-            $this->filters
+
+        return new DocumentCollection(
+            $this->getIndexFieldNames(),
+            $this->transformData(
+                $queryResponse['hits']['hits'],
+                $this->filters
+            )
         );
     }
 
@@ -74,6 +85,14 @@ class Searcher extends IndexAbstract
         return $this->paginator;
     }
 
+    /**
+     * @param string $searchText
+     * @param int    $size
+     * @param int    $page
+     * @param array  $filters
+     *
+     * @return array
+     */
     protected function getSearchArray($searchText, $size, $page, array $filters = array())
     {
         $searchParams = array(
@@ -210,6 +229,11 @@ class Searcher extends IndexAbstract
         return $restaurants;
     }
 
+    /**
+     * @param array $filters
+     *
+     * @return array
+     */
     public function hierarchyLogic(array $filters = array())
     {
         $empty = false;
