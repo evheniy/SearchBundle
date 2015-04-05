@@ -26,7 +26,7 @@ abstract class IndexAbstract
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        $this->client    = new Client(array('hosts' => array('127.0.0.1')));
+        $this->client    = new Client();
     }
     /**
      * @return string
@@ -57,6 +57,22 @@ abstract class IndexAbstract
                 return trim(preg_replace('/\s\s+/', '', $string));
             },
             file($this->getStopWords())
+        );
+    }
+
+    /**
+     * @return array
+     */
+    protected function getSynonymsArray()
+    {
+        if (!$this->isSynonymsExists()) {
+            $this->createSynonyms();
+        }
+        return array_map(
+            function ($string) {
+                return trim(preg_replace('/\s\s+/', '', $string));
+            },
+            file($this->getSynonyms())
         );
     }
 

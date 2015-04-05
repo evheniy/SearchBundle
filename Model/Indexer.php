@@ -75,11 +75,11 @@ class Indexer extends IndexAbstract
                         'filter'   => array(
                             'synonym' => array(
                                 'type'          => 'synonym',
-                                'synonyms_path' => $this->getSynonyms()
+                                'synonyms' => $this->getSynonymsArray()
                             ),
                             'stopwords' => array(
                                 'type'          => 'standard',
-                                'stopwords_path' => $this->getStopWords()
+                                'stopwords' => $this->getStopWordsArray()
                             )
                         )
                     ),
