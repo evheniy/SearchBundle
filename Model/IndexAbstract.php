@@ -70,7 +70,7 @@ abstract class IndexAbstract
         }
         return array_map(
             function ($string) {
-                return trim(preg_replace('/\s\s+/', '', $string));
+                return trim(preg_replace('/\s\s+/', ' ', $string));
             },
             file($this->getSynonyms())
         );
