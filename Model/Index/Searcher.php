@@ -3,6 +3,8 @@
 namespace Evheniy\SearchBundle\Model\Index;
 
 use Evheniy\SearchBundle\Model\Collection\DocumentCollection;
+use Evheniy\SearchBundle\Model\Collection\FilterCollection;
+use Evheniy\SearchBundle\Model\Collection\FacetCollection;
 
 /**
  * Class Searcher
@@ -20,28 +22,38 @@ class Searcher extends IndexAbstract
      */
     protected $facets = array();
     /**
-     * @var \Knp\Bundle\PaginatorBundle\Pagination\SlidingPagination
-     */
-    protected $paginator;
-    /**
      * @var array
      */
     protected $filters = array();
+    /**
+     * @var array
+     */
+    protected $filterFields = array('name', 'count', 'isActive', 'url');
+    /**
+     * @var string
+     */
+    protected $searchText = '';
 
     /**
-     * @param $searchText
-     * @param $size
-     * @param $page
-     * @param $filters
+     * @param string $searchText
+     * @param int    $size
+     * @param int    $page
+     * @param array  $filters
      * @return array
      */
-    public function search($searchText, $size, $page, array $filters = array())
+    public function search($searchText, $size = 10, $page = 1, array $filters = array())
     {
-        $this->filters = $this->hierarchyLogic($filters);
-        $queryResponse = $this->client->search($this->getSearchArray($searchText, $size, $page, $this->filters));
+        if ($size < 1) {
+            $size = 10;
+        }
+        if ($page < 1) {
+            $page = 1;
+        }
+        $this->searchText   = $searchText;
+        $this->filters      = $this->hierarchyLogic($filters);
+        $queryResponse      = $this->client->search($this->getSearchArray($searchText, $size, $page, $this->filters));
         $this->countResults = $queryResponse['hits']['total'];
-        $this->facets = $queryResponse['facets'];
-        $this->paginator = $this->container->get('knp_paginator')->paginate(array_pad(array(), $this->getCountResults(), 0), $page, $size);
+        $this->facets       = $queryResponse['facets'];
 
         return new DocumentCollection(
             $this->getIndexFieldNames(),
@@ -53,18 +65,73 @@ class Searcher extends IndexAbstract
     }
 
     /**
-     * @param string $name
+     * @return FilterCollection
+     */
+    public function getFilters()
+    {
+        $facets  = $this->getMappedFacets();
+        $filters = array();
+        foreach ($this->container->getParameter('search')['search']['filter']['fields'] as $field) {
+            if (!empty($facets[$field])) {
+                $filters[$field] = new FilterCollection(
+                    $this->filterFields,
+                    $facets[$field]
+                );
+            }
+        }
+
+        return new FacetCollection(
+            $this->container->getParameter('search')['search']['filter']['fields'],
+            $filters
+        );
+    }
+
+    /**
      * @return array
      */
-    public function getFilterByName($name)
+    protected function getMappedFacets()
     {
-        return !empty($this->filters[$name]) ? $this->filters[$name] : array();
+        $facets = array();
+        foreach ($this->container->getParameter('search')['search']['filter']['fields'] as $field) {
+            foreach ($this->facets[$field]['terms'] as $facet) {
+                $facets[$field][] = array_combine(
+                    $this->filterFields,
+                    array(
+                        $facet['term'],
+                        $facet['count'],
+                        in_array($facet['term'], $this->filters[$field]),
+                        $this->getUrlArray($field, $facet['term'], $this->filters)
+                    )
+                );
+            }
+        }
+
+        return $facets;
+    }
+
+    /**
+     * @param string $filterType
+     * @param string $filterName
+     * @param array  $filters
+     * @return string
+     */
+    public function getUrlArray($filterType, $filterName, array $filters = array())
+    {
+        if (in_array($filterName, $filters[$filterType])) {
+            $key = array_search($filterName, $filters[$filterType]);
+            unset($filters[$filterType][$key]);
+        } else {
+            $filters[$filterType][] = $filterName;
+        }
+        $newUrlArray = array_merge(array('q' => $this->searchText), $filters);
+
+        return $newUrlArray;
     }
 
     /**
      * @return int
      */
-    public function getCountResults()
+    public function getResultsCount()
     {
         return $this->countResults;
     }
@@ -75,14 +142,6 @@ class Searcher extends IndexAbstract
     public function getFacets()
     {
         return $this->facets;
-    }
-
-    /**
-     * @return \Knp\Bundle\PaginatorBundle\Pagination\SlidingPagination
-     */
-    public function getPaginator()
-    {
-        return $this->paginator;
     }
 
     /**

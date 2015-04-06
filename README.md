@@ -86,7 +86,7 @@ config.yml:
                     fields: [fields]
                     count: 10
                     analyze: true
-
+                    
 Indexing
 
         $indexer = $this->getContainer()->get('search_index');
@@ -105,6 +105,77 @@ Indexing
             );
         }
 
+indexAction()
+
+        $request    = $this->container->get('request');
+        $searcher   = $this->container->get('search');
+        $searchText = strip_tags(trim($request->get('q')));
+        $page       = $request->get('page', 1) < 1 ? 1: $request->get('page', 1);
+        $size       = $request->get('size', 10) < 1 ? 10: $request->get('size', 10);
+        
+        $filterTitle       = $request->get('filterTitle', array());
+        $filterDescription = $request->get('filterDescription', array());
+
+        $results = $searcher->search(
+            $searchText,
+            $size,
+            $page,
+            array(
+                'filterTitle'       => $filterTitle,
+                'filterDescription' => $filterDescription
+            )
+        );
+        
+        return $this->render(
+            'AppBundle:Default:index.html.twig',
+            array(
+                'searchText'  => $searchText,
+                'filters'     => $searcher->getFilters(),
+                'results' => $results,
+                'pagination'  => $searcher->getPaginator()
+            )
+        );
+
+index.html.twig
+
+    <div class="searchResults">
+            <div class="searchResultsControls">
+                {% include "AppBundle:Default:searchFilters.html.twig" %}
+            </div>
+            <div>
+                {% for result in results %}
+                    <h1><a href="{{ result.url }}">{{ result.title }}</a></h1>
+                    <article>{{ result.article }}</article>
+                {% endfor %}
+                <div class="navigation">
+                    {% include "SearchBundle::pagination.html.twig" %}
+                </div>
+            </div>
+        </div>
+
+searchFilters.html.twig
+    
+    {% for key,filter in filters %}
+        <div>
+            <div>
+                <h3 class="label">
+                    {{- ('index.filters.'~key)|trans({}, 'AppBundle') -}}
+                </h3>
+                <div class="options">
+                    <ul>
+                        {% for field in filter %}
+                            <li{% if field.isActive %} class="selected"{% endif %}>
+                                <a class="item" href="{{ path('homepage', field.url) }}">
+                                    <span class="name">{{ field.name|upper }}</span>
+                                    <span class="restaurantCount">{{ field.count }}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
 
 
 License

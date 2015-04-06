@@ -20,8 +20,8 @@ class FilterCollection extends AbstractCollection
     protected function getEntities(array $fieldNames, array $entityArray = array())
     {
         $entityCollection = array();
-        foreach ($entityArray as $entity) {
-            $entityCollection[] = FilterEntity::createFromArray($fieldNames, $entity);
+        foreach ($entityArray as $key => $entity) {
+            $entityCollection[$key] = FilterEntity::createFromArray($fieldNames, $entity);
         }
 
         return $entityCollection;

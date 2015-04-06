@@ -70,7 +70,7 @@ abstract class AbstractEntity
 
     /**
      * @param string $name
-     * @param array $arguments
+     * @param array  $arguments
      *
      * @throws \Evheniy\SearchBundle\Model\Exception\MethodNotFoundException
      * @return mixed

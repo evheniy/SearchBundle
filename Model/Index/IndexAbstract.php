@@ -63,6 +63,7 @@ abstract class IndexAbstract
         if (!$this->isStopWordsExists()) {
             $this->createStopWords();
         }
+
         return array_map(
             function ($string) {
                 return $this->trimFilter($string);
@@ -79,6 +80,7 @@ abstract class IndexAbstract
         if (!$this->isSynonymsExists()) {
             $this->createSynonyms();
         }
+
         return array_map(
             function ($string) {
                 return $this->trimFilter($string);

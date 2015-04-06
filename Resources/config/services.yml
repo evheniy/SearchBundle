@@ -1,10 +1,4 @@
 services:
-    evheniy.twig.search_extension:
-        class: Evheniy\SearchBundle\Twig\SearchExtension
-        arguments: [@service_container]
-        tags:
-            - { name: twig.extension }
-
     search:
         class: Evheniy\SearchBundle\Model\Index\Searcher
         arguments: [@service_container]
