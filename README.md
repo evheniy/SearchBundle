@@ -1,5 +1,6 @@
 SearchBundle
 =================
+[![Latest Stable Version](https://poser.pugx.org/evheniy/search-bundle/v/stable.svg)](https://packagist.org/packages/evheniy/search-bundle) [![Total Downloads](https://poser.pugx.org/evheniy/search-bundle/downloads.svg)](https://packagist.org/packages/evheniy/search-bundle) [![Latest Unstable Version](https://poser.pugx.org/evheniy/search-bundle/v/unstable.svg)](https://packagist.org/packages/evheniy/search-bundle) [![License](https://poser.pugx.org/evheniy/search-bundle/license.svg)](https://packagist.org/packages/evheniy/search-bundle)
 
 This bundle provides Search mechanism (elasticsearch) in Symfony2
 
