@@ -1,6 +1,6 @@
 {
     "name": "evheniy/search-bundle",
-    "version": "0.2",
+    "version": "1.0",
     "description": "The SearchBundle adds the ability to use simple elasticsearch search in your application.",
     "keywords": ["Elasticsearch", "Search", "Facets", "Symfony2", "simple"],
     "type": "symfony-bundle",
