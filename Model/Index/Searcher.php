@@ -174,7 +174,7 @@ class Searcher extends IndexAbstract
                 'from'      => ($page - 1) * $size,
                 'highlight' => array(
                     'pre_tags'  => array($this->container->getParameter('search')['color_tag_open']),
-                    'post_tags' => array($this->container->getParameter('search')['color_tag_close']),
+                    'post_tags' => array($this->container->getParameter('search')['color_tag_close'] . ' '),
                     'fields'    => array()
                 )
             )
@@ -255,7 +255,7 @@ class Searcher extends IndexAbstract
                         $restaurant['_source'][$filtersKey] =
                             $this->container->getParameter('search')['color_tag_open']
                             . ucwords($restaurant['_source'][$filtersKey])
-                            . $this->container->getParameter('search')['color_tag_close'];
+                            . $this->container->getParameter('search')['color_tag_close'] . ' ';
                     }
                 } else {
                     foreach ($restaurant['_source'][$filtersKey] as $k => $v) {
@@ -264,7 +264,7 @@ class Searcher extends IndexAbstract
                             $restaurant['_source'][$filtersKey][$k] =
                                 $this->container->getParameter('search')['color_tag_open']
                                 . ucwords($restaurant['_source'][$filtersKey][$k])
-                                . $this->container->getParameter('search')['color_tag_close'];
+                                . $this->container->getParameter('search')['color_tag_close'] . ' ';
                         }
                     }
                 }
