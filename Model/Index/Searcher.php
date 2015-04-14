@@ -120,8 +120,26 @@ class Searcher extends IndexAbstract
         if (in_array($filterName, $filters[$filterType])) {
             $key = array_search($filterName, $filters[$filterType]);
             unset($filters[$filterType][$key]);
+            $empty = false;
+            foreach ($filters as $id => $value) {
+                if ($id == $filterType) {
+                    $empty = true;
+                }
+                if ($empty) {
+                    $filters[$id] = array();
+                }
+            }
         } else {
-            $filters[$filterType][] = $filterName;
+            $filters[$filterType] = [$filterName];
+            $empty = false;
+            foreach ($filters as $id => $value) {
+                if ($empty) {
+                    $filters[$id] = array();
+                }
+                if ($id == $filterType) {
+                    $empty = true;
+                }
+            }
         }
         $newUrlArray = array_merge(array('q' => $this->searchText), $filters);
 
