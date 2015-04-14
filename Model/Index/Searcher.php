@@ -192,7 +192,7 @@ class Searcher extends IndexAbstract
                 'from'      => ($page - 1) * $size,
                 'highlight' => array(
                     'pre_tags'  => array($this->container->getParameter('search')['color_tag_open']),
-                    'post_tags' => array(' ' . $this->container->getParameter('search')['color_tag_close']),
+                    'post_tags' => array($this->container->getParameter('search')['color_tag_close']),
                     'fields'    => array()
                 )
             )
@@ -200,7 +200,14 @@ class Searcher extends IndexAbstract
 
         //query fields
         foreach ($this->container->getParameter('search')['search']['fields'] as $field) {
-            $searchParams['body']['query']['multi_match']['fields'][] = $field;
+            $field_ = $field;
+            $priorities = $this->container->getParameter('search')['search']['parameters']['priorities'];
+            foreach ($priorities as $priority) {
+                if (!empty($priority[$field_])) {
+                    $field_ = $field_ . '^' . $priority[$field_];
+                }
+            }
+            $searchParams['body']['query']['multi_match']['fields'][] = $field_;
             $searchParams['body']['highlight']['fields'][$field] = array(
                 'fragment_size'       => 1500,
                 'number_of_fragments' => 3
@@ -273,7 +280,7 @@ class Searcher extends IndexAbstract
                         $restaurant['_source'][$filtersKey] =
                             $this->container->getParameter('search')['color_tag_open']
                             . ucwords($restaurant['_source'][$filtersKey])
-                            . ' ' . $this->container->getParameter('search')['color_tag_close'];
+                            . $this->container->getParameter('search')['color_tag_close'];
                     }
                 } else {
                     foreach ($restaurant['_source'][$filtersKey] as $k => $v) {
@@ -282,7 +289,7 @@ class Searcher extends IndexAbstract
                             $restaurant['_source'][$filtersKey][$k] =
                                 $this->container->getParameter('search')['color_tag_open']
                                 . ucwords($restaurant['_source'][$filtersKey][$k])
-                                . ' ' . $this->container->getParameter('search')['color_tag_close'];
+                                . $this->container->getParameter('search')['color_tag_close'];
                         }
                     }
                 }
