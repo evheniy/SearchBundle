@@ -202,10 +202,8 @@ class Searcher extends IndexAbstract
         foreach ($this->container->getParameter('search')['search']['fields'] as $field) {
             $field_ = $field;
             $priorities = $this->container->getParameter('search')['search']['parameters']['priorities'];
-            foreach ($priorities as $priority) {
-                if (!empty($priority[$field_])) {
-                    $field_ = $field_ . '^' . $priority[$field_];
-                }
+            if (!empty($priorities[$field_])) {
+                $field_ = $field_ . '^' . $priorities[$field_];
             }
             $searchParams['body']['query']['multi_match']['fields'][] = $field_;
             $searchParams['body']['highlight']['fields'][$field] = array(

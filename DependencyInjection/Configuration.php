@@ -34,7 +34,7 @@ class Configuration implements ConfigurationInterface
                                 ->scalarNode('type')->defaultValue('best_fields')->end()
                                 ->scalarNode('tie_breaker')->defaultValue(0.3)->end()
                                 ->scalarNode('minimum_should_match')->defaultValue('30%')->end()
-                                ->arrayNode('priorities')->prototype('array')->children()->end()->end()->end()
+                                ->arrayNode('priorities')->prototype('scalar')->end()->end()
                             ->end()
                         ->end()
                         ->arrayNode('filter')
