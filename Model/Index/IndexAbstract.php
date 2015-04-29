@@ -4,6 +4,8 @@ namespace Evheniy\SearchBundle\Model\Index;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Elasticsearch\Client;
+use Evheniy\SearchBundle\DependencyInjection\Configuration;
+use Symfony\Component\Config\Definition\Processor;
 
 /**
  * Class IndexAbstract
@@ -14,11 +16,15 @@ abstract class IndexAbstract
     /**
      * @var \Symfony\Component\DependencyInjection\ContainerInterface
      */
-    protected $container;
+    private $container;
     /**
      * @var Client
      */
     protected $client;
+    /**
+     * @var array
+     */
+    protected $params = array();
 
     /**
      * @param ContainerInterface $container
@@ -27,13 +33,26 @@ abstract class IndexAbstract
     {
         $this->container = $container;
         $this->client    = new Client();
+        $this->params    = $container->getParameter('search');
     }
+
+    /**
+     * @param array $configs
+     */
+    public function load(array $configs)
+    {
+        $processor = new Processor();
+        $configuration = new Configuration();
+        $config = $processor->processConfiguration($configuration, array($configs));
+        $this->params = $config;
+    }
+
     /**
      * @return string
      */
     public function getIndexName()
     {
-        return  $this->container->getParameter('search')['index_name'];
+        return  $this->params['index_name'];
     }
 
     /**
@@ -41,7 +60,7 @@ abstract class IndexAbstract
      */
     public function getIndexType()
     {
-        return  $this->container->getParameter('search')['index_type'];
+        return  $this->params['index_type'];
     }
 
     /**
@@ -49,10 +68,7 @@ abstract class IndexAbstract
      */
     public function getIndexFieldNames()
     {
-        return array_merge(
-            $this->container->getParameter('search')['search']['fields'],
-            $this->container->getParameter('search')['search']['filter']['fields']
-        );
+        return $this->params['index']['fields'];
     }
 
     /**

@@ -48,11 +48,7 @@ class Indexer extends IndexAbstract
             'type'  => $this->getIndexType(),
             'body'  => array()
         );
-        $fields = array_merge(
-            $this->container->getParameter('search')['search']['fields'],
-            $this->container->getParameter('search')['search']['filter']['fields']
-        );
-        foreach ($fields as $field) {
+        foreach ($this->params['index']['fields'] as $field) {
             $params['body'][$field] = !empty($document->$field) ? $document->$field : '';
         }
         $this->client->index($params);
@@ -71,7 +67,7 @@ class Indexer extends IndexAbstract
                         'analyzer' => array(
                             'synonym' => array(
                                 'tokenizer' => 'whitespace',
-                                'filter'    => array('synonym', 'stopwords')
+                                'filter'    => array('synonym', 'stopwords', 'lowercase')
                             )
                         ),
                         'filter'   => array(
@@ -82,6 +78,9 @@ class Indexer extends IndexAbstract
                             'stopwords' => array(
                                 'type'          => 'standard',
                                 'stopwords' => $this->getStopWordsArray()
+                            ),
+                            'lowercase' => array(
+                                'type' => 'lowercase'
                             )
                         )
                     ),
@@ -96,15 +95,15 @@ class Indexer extends IndexAbstract
         );
 
         //properties
-        foreach ($this->container->getParameter('search')['search']['fields'] as $field) {
+        foreach ($this->params['index']['fields'] as $field) {
             $structure['body']['settings']['properties'][$field] = array(
                 'type'        => 'string',
                 'analyzer'    => 'synonym',
                 'term_vector' => 'with_positions_offsets'
             );
         }
-        foreach ($this->container->getParameter('search')['search']['filter']['fields'] as $field) {
-            if ($this->container->getParameter('search')['search']['filter']['analyze']) {
+        foreach ($this->params['search']['filter']['fields'] as $field => $params) {
+            if ($this->params['search']['filter']['analyze']) {
                 $structure['body']['settings']['properties'][$field] = array(
                     'type'        => 'string',
                     'analyzer'    => 'synonym',
@@ -120,15 +119,15 @@ class Indexer extends IndexAbstract
         }
 
         //mappings
-        foreach ($this->container->getParameter('search')['search']['fields'] as $field) {
+        foreach ($this->params['index']['fields'] as $field) {
             $structure['body']['mappings'][$this->getIndexType()]['properties'][$field] = array(
                 'type'        => 'string',
                 'analyzer'    => 'synonym',
                 'term_vector' => 'with_positions_offsets'
             );
         }
-        foreach ($this->container->getParameter('search')['search']['filter']['fields'] as $field) {
-            if ($this->container->getParameter('search')['search']['filter']['analyze']) {
+        foreach ($this->params['search']['filter']['fields'] as $field => $params) {
+            if ($this->params['search']['filter']['analyze']) {
                 $structure['body']['mappings'][$this->getIndexType()]['properties'][$field] = array(
                     'type'            => 'string',
                     'search_analyzer' => 'synonym',
