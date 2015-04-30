@@ -97,7 +97,7 @@ class Searcher extends IndexAbstract
         }
 
         return new FacetCollection(
-            $this->params['search']['filter']['fields'],
+            array_keys($this->params['search']['filter']['fields']),
             $filters
         );
     }

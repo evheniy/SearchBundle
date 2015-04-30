@@ -38,6 +38,7 @@ abstract class IndexAbstract
 
     /**
      * @param array $configs
+     * @return $this
      */
     public function load(array $configs)
     {
@@ -45,6 +46,8 @@ abstract class IndexAbstract
         $configuration = new Configuration();
         $config = $processor->processConfiguration($configuration, array($configs));
         $this->params = $config;
+
+        return $this;
     }
 
     /**
