@@ -38,9 +38,9 @@ class Searcher extends IndexAbstract
 
     /**
      * @param string $searchText
-     * @param int    $size
-     * @param int    $page
-     * @param array  $filters
+     * @param int $size
+     * @param int $page
+     * @param array $filters
      * @return array
      */
     public function search($searchText, $size = 10, $page = 1, array $filters = array())
@@ -57,11 +57,13 @@ class Searcher extends IndexAbstract
             },
             $filters
         );
-        $this->searchText   = $searchText;
-        $this->filters      = $this->hierarchyLogic($filters);
-        $queryResponse      = $this->client->search($this->getSearchArray($searchText, $size, $page, $this->filters));
+        $this->searchText = $searchText;
+        $this->filters = $this->hierarchyLogic($filters);
+        //echo json_encode($this->getSearchArray($searchText, $size, $page, $this->filters));
+        $queryResponse = $this->client->search($this->getSearchArray($searchText, $size, $page, $this->filters));
         $this->countResults = $queryResponse['hits']['total'];
-        $this->facets       = $queryResponse['facets'];
+        $this->facets = $queryResponse['aggregations'];
+
 
         return new DocumentCollection(
             $this->getIndexFieldNames(),
@@ -85,7 +87,7 @@ class Searcher extends IndexAbstract
      */
     public function getFilters()
     {
-        $facets  = $this->getMappedFacets();
+        $facets = $this->getMappedFacets();
         $filters = array();
         foreach ($this->params['search']['filter']['fields'] as $field => $filterData) {
             if (!empty($facets[$field])) {
@@ -107,18 +109,31 @@ class Searcher extends IndexAbstract
      */
     protected function getMappedFacets()
     {
+
+        return $this->getRecursiveAggs($this->facets);
+    }
+
+    protected function getRecursiveAggs($aggs)
+    {
         $facets = array();
-        foreach ($this->params['search']['filter']['fields'] as $field => $filterData) {
-            foreach ($this->facets[$field]['terms'] as $facet) {
-                $facets[$field][] = array_combine(
+        foreach ($aggs as $aggName => $buckets) {
+            foreach ($buckets['buckets'] as $agg) {
+                $facets[$aggName][] = array_combine(
                     $this->filterFields,
                     array(
-                        $facet['term'],
-                        $facet['count'],
-                        in_array($facet['term'], $this->filters[$field]),
-                        $this->getUrlArray($field, $facet['term'], $this->filters)
+                        $agg['key'],
+                        $agg['doc_count'],
+                        in_array($agg['key'], $this->filters[$aggName]),
+                        $this->getUrlArray($aggName, $agg['key'], $this->filters)
                     )
                 );
+                if (in_array($agg['key'], $this->filters[$aggName])) {
+                    foreach (array_keys($this->params['search']['filter']['fields']) as $field) {
+                        if (!empty($agg[$field])) {
+                            $facets = array_merge($facets, $this->getRecursiveAggs(array($field => $agg[$field])));
+                        }
+                    }
+                }
             }
         }
 
@@ -128,7 +143,7 @@ class Searcher extends IndexAbstract
     /**
      * @param string $filterName
      * @param string $filterValue
-     * @param array  $filters
+     * @param array $filters
      * @return string
      */
     public function getUrlArray($filterName, $filterValue, array $filters = array())
@@ -155,13 +170,13 @@ class Searcher extends IndexAbstract
 
     /**
      * @param string $parent
-     * @param array  $children
+     * @param array $children
      * @return array
      */
     protected function getChildren($parent, array $children = array())
     {
         foreach ($this->params['search']['filter']['fields'] as $key => $val) {
-            if ($this->params['search']['filter']['fields'][$key]['parent'] == $parent) {
+            if (!empty($this->params['search']['filter']['fields'][$key]['parent']) && $this->params['search']['filter']['fields'][$key]['parent'] == $parent) {
                 $children = array_merge($children, $this->getChildren($key), array($key));
             }
         }
@@ -187,9 +202,9 @@ class Searcher extends IndexAbstract
 
     /**
      * @param string $searchText
-     * @param int    $size
-     * @param int    $page
-     * @param array  $filters
+     * @param int $size
+     * @param int $page
+     * @param array $filters
      *
      * @return array
      */
@@ -197,64 +212,55 @@ class Searcher extends IndexAbstract
     {
         $searchParams = array(
             'index' => $this->getIndexName(),
-            'type'  => $this->getIndexType(),
-            'body'  => array(
-                'query'     => array(
-                    'multi_match' => array()
-                ),
-                'size'      => $size,
-                'from'      => ($page - 1) * $size,
+            'type' => $this->getIndexType(),
+            'body' => array(
+                'query' => $this->params['search']['query'],
+                'size' => $size,
+                'from' => ($page - 1) * $size,
                 'highlight' => array(
-                    'pre_tags'  => array($this->params['color_tag_open']),
+                    'pre_tags' => array($this->params['color_tag_open']),
                     'post_tags' => array($this->params['color_tag_close']),
-                    'fields'    => array()
+                    'fields' => $this->params['search']['highlight']['fields']
                 )
             )
         );
-        $multi_match = $this->params['search']['parameters'];
-        unset($multi_match['priorities']);
-        $searchParams['body']['query']['multi_match'] = $multi_match;
-        $searchParams['body']['query']['multi_match']['fields'] = array();
-        $searchParams['body']['query']['multi_match']['query'] = $this->getFilteredQuery($searchText);
-
-        //query fields
-        foreach ($this->params['search']['fields'] as $field) {
-            $field_ = $field;
-            $priorities = $this->params['search']['parameters']['priorities'];
-            if (!empty($priorities[$field_])) {
-                $field_ = $field_ . '^' . $priorities[$field_];
+        array_walk_recursive($searchParams['body']['query'], function (&$item, $key) use ($searchText) {
+            if ($key === 'query') {
+                $item = $this->getFilteredQuery($searchText);
             }
-            $searchParams['body']['query']['multi_match']['fields'][] = $field_;
-            if (in_array($field, array_keys($this->params['search']['highlight']['fields']))) {
-                $searchParams['body']['highlight']['fields'][$field] = $this->params['search']['highlight']['fields'][$field];
-            }
+        });
+        if (!empty($this->params['search']['_source'])) {
+            $searchParams['body']['_source'] = $this->params['search']['_source'];
         }
 
-        //facets
+        //aggregations
         foreach ($filters as $id => $filter) {
-            $searchParams['body']['facets'][$id]['terms'] = array(
-                'field' => $id,
-                'order' => 'count',
-                'size'  => $size
+            $_filter = array(
+                'terms' => array(
+                    'field' => $id,
+                    'order' => array('_count' => "desc"),
+                    'size' => $size
+                )
             );
-            $_filters = array();
             $parent = $id;
             while (!empty($this->params['search']['filter']['fields'][$parent]['parent'])) {
-                $parent = $this->params['search']['filter']['fields'][$parent]['parent'];
-                $_filters[] = array(
+                $_filter = array(
                     'terms' => array(
-                        $parent => $filters[$parent]
+                        'field' => $this->params['search']['filter']['fields'][$parent]['parent'],
+                        'order' => array('_count' => "desc"),
+                        'size' => $size,
+                        'include' => $filters[$this->params['search']['filter']['fields'][$parent]['parent']]
+                    ),
+                    'aggs' => array(
+                        $parent => $_filter
                     )
                 );
-            }
-            if (!empty($_filters)) {
-                if (count($_filters) == 1) {
-                    $searchParams['body']['facets'][$id]['facet_filter'] =  $_filters;
-                } else {
-                    $searchParams['body']['facets'][$id]['facet_filter']['and']['filters'] =  $_filters;
+                $parent = $this->params['search']['filter']['fields'][$parent]['parent'];
+                if (!empty($this->params['search']['filter']['fields'][$parent]['parent'])) {
+                    unset($_filter['terms']['include']);
                 }
             }
-
+            $searchParams['body']['aggs'][$parent] = $_filter;
         }
 
         //filters
@@ -296,26 +302,28 @@ class Searcher extends IndexAbstract
                     },
                     $filtersVal
                 );
-                if (!is_array($restaurant['_source'][$filtersKey])) {
-                    if (false !== array_search(strtoupper($restaurant['_source'][$filtersKey]), $filtersVal)) {
-                        if (in_array($filtersKey, array_keys($this->params['search']['highlight']['fields']))) {
-                            $restaurant['_source'][$filtersKey] =
-                                $this->params['color_tag_open']
-                                . ucwords($restaurant['_source'][$filtersKey])
-                                . $this->params['color_tag_close'];
+                if (!empty($restaurant['_source'][$filtersKey])) {
+                    if (!is_array($restaurant['_source'][$filtersKey])) {
+                        if (false !== array_search(strtoupper($restaurant['_source'][$filtersKey]), $filtersVal)) {
+                            if (in_array($filtersKey, array_keys($this->params['search']['highlight']['fields']))) {
+                                $restaurant['_source'][$filtersKey] =
+                                    $this->params['color_tag_open']
+                                    . ucwords($restaurant['_source'][$filtersKey])
+                                    . $this->params['color_tag_close'];
+                            }
                         }
-                    }
-                } else {
-                    foreach ($restaurant['_source'][$filtersKey] as $k => $v) {
-                        if (in_array($filtersKey, array_keys($this->params['search']['highlight']['fields'])) && false !== array_search(strtoupper($v), $filtersVal)
-                        ) {
-                            $restaurant['_source'][$filtersKey][$k] =
-                                $this->params['color_tag_open']
-                                . ucwords($restaurant['_source'][$filtersKey][$k])
-                                . $this->params['color_tag_close'];
+                    } else {
+                        foreach ($restaurant['_source'][$filtersKey] as $k => $v) {
+                            if (in_array($filtersKey, array_keys($this->params['search']['highlight']['fields'])) && false !== array_search(strtoupper($v), $filtersVal)
+                            ) {
+                                $restaurant['_source'][$filtersKey][$k] =
+                                    $this->params['color_tag_open']
+                                    . ucwords($restaurant['_source'][$filtersKey][$k])
+                                    . $this->params['color_tag_close'];
+                            }
                         }
+                        $restaurant['_source'][$filtersKey] = array_unique($restaurant['_source'][$filtersKey]);
                     }
-                    $restaurant['_source'][$filtersKey] = array_unique($restaurant['_source'][$filtersKey]);
                 }
             }
             foreach ($restaurant['_source'] as $key => $val) {

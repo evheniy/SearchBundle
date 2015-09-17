@@ -5,7 +5,7 @@ namespace Evheniy\SearchBundle\Model\Index;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Elasticsearch\Client;
 use Evheniy\SearchBundle\DependencyInjection\Configuration;
-use Symfony\Component\Config\Definition\Processor;
+
 
 /**
  * Class IndexAbstract
@@ -32,8 +32,14 @@ abstract class IndexAbstract
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        $this->client    = new Client();
         $this->params    = $container->getParameter('search');
+        $this->client    = new Client(
+            array(
+                'hosts' => array(
+                    $this->params['search_url']
+                )
+            )
+        );
     }
 
     /**
@@ -42,10 +48,8 @@ abstract class IndexAbstract
      */
     public function load(array $configs)
     {
-        $processor = new Processor();
-        $configuration = new Configuration();
-        $config = $processor->processConfiguration($configuration, array($configs));
-        $this->params = $config;
+        $configuration = new Configuration($configs);
+        $this->params = $configuration->validate()->filter()->getConfig();
 
         return $this;
     }
