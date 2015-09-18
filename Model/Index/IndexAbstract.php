@@ -3,7 +3,7 @@
 namespace Evheniy\SearchBundle\Model\Index;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Elasticsearch\Client;
+use Elasticsearch\ClientBuilder;
 use Evheniy\SearchBundle\DependencyInjection\Configuration;
 
 
@@ -32,14 +32,14 @@ abstract class IndexAbstract
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        $this->params    = $container->getParameter('search');
-        $this->client    = new Client(
+        $this->params = $container->getParameter('search');
+        $clientBuilder = ClientBuilder::create();
+        $clientBuilder->setHosts(
             array(
-                'hosts' => array(
-                    $this->params['search_url']
-                )
+                $this->params['search_url']
             )
         );
+        $this->client = $clientBuilder->build();
     }
 
     /**
@@ -59,7 +59,7 @@ abstract class IndexAbstract
      */
     public function getIndexName()
     {
-        return  $this->params['index_name'];
+        return $this->params['index_name'];
     }
 
     /**
@@ -67,7 +67,7 @@ abstract class IndexAbstract
      */
     public function getIndexType()
     {
-        return  $this->params['index_type'];
+        return $this->params['index_type'];
     }
 
     /**
@@ -135,7 +135,7 @@ abstract class IndexAbstract
      */
     protected function createSynonyms()
     {
-        copy(__DIR__.'/../Resources/config/synonyms.txt.dist', $this->getSynonyms());
+        copy(__DIR__ . '/../Resources/config/synonyms.txt.dist', $this->getSynonyms());
     }
 
     /**
@@ -143,7 +143,7 @@ abstract class IndexAbstract
      */
     protected function getSynonyms()
     {
-        return $this->container->get('kernel')->getRootDir().'/config/synonyms.txt';
+        return $this->container->get('kernel')->getRootDir() . '/config/synonyms.txt';
     }
 
     /**
@@ -159,7 +159,7 @@ abstract class IndexAbstract
      */
     protected function createStopWords()
     {
-        copy(__DIR__.'/../Resources/config/stopwords.txt.dist', $this->getStopWords());
+        copy(__DIR__ . '/../Resources/config/stopwords.txt.dist', $this->getStopWords());
     }
 
     /**
@@ -167,6 +167,6 @@ abstract class IndexAbstract
      */
     protected function getStopWords()
     {
-        return $this->container->get('kernel')->getRootDir().'/config/stopwords.txt';
+        return $this->container->get('kernel')->getRootDir() . '/config/stopwords.txt';
     }
 }
