@@ -25,26 +25,14 @@ class Configuration
 
     /**
      * @return $this
+     * @throws Exception
      */
     public function validate()
     {
-        if (empty($this->config['search_url'])) {
-            throw new Exception('Empty "search_url" parameter!');
-        }
-        if (empty($this->config['index_name'])) {
-            throw new Exception('Empty "index_name" parameter!');
-        }
-        if (empty($this->config['index_type'])) {
-            throw new Exception('Empty "index_type" parameter!');
-        }
-        if (empty($this->config['color_tag_open'])) {
-            throw new Exception('Empty "color_tag_open" parameter!');
-        }
-        if (empty($this->config['color_tag_close'])) {
-            throw new Exception('Empty "color_tag_close" parameter!');
-        }
-        if (empty($this->config['query_parameter'])) {
-            throw new Exception('Empty "query_parameter" parameter!');
+        foreach (array('search_url', 'index_name', 'index_type', 'color_tag_open', 'color_tag_close', 'query_parameter') as $parameter) {
+            if (empty($this->config[$parameter])) {
+                throw new Exception('Empty "' . $parameter . '" parameter!');
+            }
         }
         if (empty($this->config['search']['query'])) {
             throw new Exception('Empty [\'search\'][\'query\'] parameter!');
@@ -54,6 +42,13 @@ class Configuration
         }
         if (empty($this->config['search']['highlight']['number_of_fragments'])) {
             $configs['search']['highlight']['number_of_fragments'] = 3;
+        }
+        if (!empty($this->config['search']['filter']) && !is_array($this->config['search']['filter']['fields'])) {
+            throw new Exception("['search']['filter']['fields'] should be array");
+        } else {
+            if (!empty(array_diff(array_keys($this->config['search']['filter']['fields']), $this->config['index']['fields']))) {
+                throw new Exception("['search']['filter']['fields'] should be from ['search']['fields']");
+            }
         }
 
         return $this;
@@ -65,13 +60,6 @@ class Configuration
      */
     public function filter()
     {
-        if (!empty($this->config['search']['filter']) && !is_array($this->config['search']['filter']['fields'])) {
-            throw new Exception("['search']['filter']['fields'] should be array");
-        } else {
-            if (!empty(array_diff(array_keys($this->config['search']['filter']['fields']), $this->config['index']['fields']))) {
-                throw new Exception("['search']['filter']['fields'] should be from ['search']['fields']");
-            }
-        }
         if (!empty($this->config['search']['highlight']) && !is_array($this->config['search']['highlight']['fields'])) {
             if (!in_array($this->config['search']['highlight']['fields'], array('all', 'none'))) {
                 throw new Exception("['search']['highlight']['fields'] should be all, none or array");

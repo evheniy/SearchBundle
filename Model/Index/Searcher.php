@@ -38,9 +38,9 @@ class Searcher extends IndexAbstract
 
     /**
      * @param string $searchText
-     * @param int $size
-     * @param int $page
-     * @param array $filters
+     * @param int    $size
+     * @param int    $page
+     * @param array  $filters
      * @return array
      */
     public function search($searchText, $size = 10, $page = 1, array $filters = array())
@@ -52,8 +52,8 @@ class Searcher extends IndexAbstract
             $page = 1;
         }
         $filters = array_map(
-            function ($v) {
-                return array_values($v);
+            function ($value) {
+                return array_values($value);
             },
             $filters
         );
@@ -88,7 +88,7 @@ class Searcher extends IndexAbstract
     {
         $facets = $this->getMappedFacets();
         $filters = array();
-        foreach ($this->params['search']['filter']['fields'] as $field => $filterData) {
+        foreach (array_keys($this->params['search']['filter']['fields']) as $field) {
             if (!empty($facets[$field])) {
                 $filters[$field] = new FilterCollection(
                     $this->filterFields,
@@ -142,7 +142,7 @@ class Searcher extends IndexAbstract
     /**
      * @param string $filterName
      * @param string $filterValue
-     * @param array $filters
+     * @param array  $filters
      * @return string
      */
     public function getUrlArray($filterName, $filterValue, array $filters = array())
@@ -174,7 +174,7 @@ class Searcher extends IndexAbstract
      */
     protected function getChildren($parent, array $children = array())
     {
-        foreach ($this->params['search']['filter']['fields'] as $key => $val) {
+        foreach (array_keys($this->params['search']['filter']['fields']) as $key) {
             if (!empty($this->params['search']['filter']['fields'][$key]['parent']) && $this->params['search']['filter']['fields'][$key]['parent'] == $parent) {
                 $children = array_merge($children, $this->getChildren($key), array($key));
             }
@@ -350,8 +350,8 @@ class Searcher extends IndexAbstract
 
     /**
      * @param array $filters
-     *
      * @return array
+     * @throws Exception
      */
     public function hierarchyLogic(array $filters = array())
     {
@@ -359,7 +359,7 @@ class Searcher extends IndexAbstract
             throw new Exception('Filters are not in config');
         }
 
-        foreach ($filters as $id => $value) {
+        foreach (array_keys($filters) as $id) {
             if (!empty($this->params['search']['filter']['fields'][$id]['parent']) && empty($filters[$this->params['search']['filter']['fields'][$id]['parent']])) {
                 $filters[$id] = array();
             }
