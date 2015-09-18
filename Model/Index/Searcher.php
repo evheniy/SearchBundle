@@ -64,7 +64,6 @@ class Searcher extends IndexAbstract
         $this->countResults = $queryResponse['hits']['total'];
         $this->facets = $queryResponse['aggregations'];
 
-
         return new DocumentCollection(
             $this->getIndexFieldNames(),
             $this->transformData(
@@ -248,13 +247,15 @@ class Searcher extends IndexAbstract
                     'terms' => array(
                         'field' => $this->params['search']['filter']['fields'][$parent]['parent'],
                         'order' => array('_count' => "desc"),
-                        'size' => $size,
-                        'include' => $filters[$this->params['search']['filter']['fields'][$parent]['parent']]
+                        'size' => $size
                     ),
                     'aggs' => array(
                         $parent => $_filter
                     )
                 );
+                if (!empty($filters[$this->params['search']['filter']['fields'][$parent]['parent']])) {
+                    $_filter['terms']['include'] = $filters[$this->params['search']['filter']['fields'][$parent]['parent']];
+                }
                 $parent = $this->params['search']['filter']['fields'][$parent]['parent'];
                 if (!empty($this->params['search']['filter']['fields'][$parent]['parent'])) {
                     unset($_filter['terms']['include']);
