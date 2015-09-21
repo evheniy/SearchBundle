@@ -21,10 +21,10 @@ class DocumentEntityTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->entity = DocumentEntity::createFromArray(
-            array('field1', 'field2'),
+            array('documentField1', 'documentField2'),
             array(
-                'field1' => 1,
-                'field2' => 2
+                'documentField1' => 1,
+                'documentField2' => 2
             )
         );
     }
@@ -35,14 +35,14 @@ class DocumentEntityTest extends \PHPUnit_Framework_TestCase
     public function testCreateFromArray()
     {
         $entity = DocumentEntity::createFromArray(
-            array('field3', 'field4'),
-            array('field3' => 3)
+            array('documentField3', 'documentField4'),
+            array('documentField3' => 3)
         );
         $this->assertInstanceOf('Evheniy\SearchBundle\Model\Entity\DocumentEntity', $entity);
-        $this->assertTrue(!empty($entity->field3));
-        $this->assertEquals($entity->field3, 3);
-        $this->assertTrue(isset($entity->field4));
-        $this->assertTrue(empty($entity->field4));
+        $this->assertTrue(!empty($entity->documentField3));
+        $this->assertEquals($entity->documentField3, 3);
+        $this->assertTrue(isset($entity->documentField4));
+        $this->assertTrue(empty($entity->documentField4));
     }
 
     /**
@@ -50,15 +50,15 @@ class DocumentEntityTest extends \PHPUnit_Framework_TestCase
      */
     public function testGet()
     {
-        $this->assertTrue(!empty($this->entity->field1));
-        $this->assertEquals($this->entity->field1, 1);
-        $this->assertTrue(!empty($this->entity->field2));
-        $this->assertEquals($this->entity->field2, 2);
+        $this->assertTrue(!empty($this->entity->documentField1));
+        $this->assertEquals($this->entity->documentField1, 1);
+        $this->assertTrue(!empty($this->entity->documentField2));
+        $this->assertEquals($this->entity->documentField2, 2);
         $this->setExpectedException(
             'Evheniy\SearchBundle\Model\Exception\FieldNotFoundException',
-            'Field field3 doesn\'t exist!'
+            'Field documentField3 doesn\'t exist!'
         );
-        $this->entity->field3;
+        $this->entity->documentField3;
     }
 
     /**
@@ -66,8 +66,8 @@ class DocumentEntityTest extends \PHPUnit_Framework_TestCase
      */
     public function testSet()
     {
-        $this->entity->field1 = 5;
-        $this->assertEquals($this->entity->field1, 5);
+        $this->entity->documentField1 = 5;
+        $this->assertEquals($this->entity->documentField1, 5);
     }
 
     /**
@@ -75,8 +75,8 @@ class DocumentEntityTest extends \PHPUnit_Framework_TestCase
      */
     public function testIsset()
     {
-        $this->assertTrue(isset($this->entity->field1));
-        $this->assertTrue(isset($this->entity->field2));
+        $this->assertTrue(isset($this->entity->documentField1));
+        $this->assertTrue(isset($this->entity->documentField2));
     }
 
     /**
@@ -84,19 +84,19 @@ class DocumentEntityTest extends \PHPUnit_Framework_TestCase
      */
     public function testCall()
     {
-        $this->assertTrue(!empty($this->entity->getField1()));
-        $this->assertEquals($this->entity->getField1(), 1);
-        $this->assertTrue(!empty($this->entity->getField2()));
-        $this->assertEquals($this->entity->getField2(), 2);
+        $this->assertTrue(!empty($this->entity->getDocumentField1()));
+        $this->assertEquals($this->entity->getDocumentField1(), 1);
+        $this->assertTrue(!empty($this->entity->getDocumentField2()));
+        $this->assertEquals($this->entity->getDocumentField2(), 2);
         $this->setExpectedException(
             'Evheniy\SearchBundle\Model\Exception\MethodNotFoundException',
             'Only getFieldName() methods!'
         );
-        $this->entity->field3();
+        $this->entity->documentField3();
         $this->setExpectedException(
             'Evheniy\SearchBundle\Model\Exception\FieldNotFoundException',
-            'Field field3 doesn\'t exist!'
+            'Field documentField3 doesn\'t exist!'
         );
-        $this->entity->getField3();
+        $this->entity->getDocumentField3();
     }
 }
